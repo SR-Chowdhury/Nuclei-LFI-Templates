@@ -1,21 +1,22 @@
-id: lfi-passwd-disclosure
+id: sr7-lfi-os-file-disclosure
 
 info:
-  name: Local File Inclusion - /etc/passwd Disclosure
+  name: Generic LFI - Linux or Windows File Disclosure
   author: sr7
-  severity: critical
+  severity: high
   description: |
-    Detects confirmed LFI via traversal in query parameters. Matches the
-    actual /etc/passwd format observed on the target, including app-specific
-    user entries (e.g., domain-based usernames).
+    Checks for possible local file disclosure by requesting common operating-system
+    files through example query parameters. Manually verify every match.
   reference:
     - https://owasp.org/www-community/attacks/Path_Traversal
-  tags: lfi,traversal,vuln
+    - https://github.com/projectdiscovery/nuclei-templates/blob/main/http/vulnerabilities/generic/generic-linux-lfi.yaml
+    - https://github.com/projectdiscovery/nuclei-templates/blob/main/http/vulnerabilities/generic/generic-windows-lfi.yaml
+  tags: lfi,path-traversal,file-disclosure
 
 http:
   - method: GET
     path:
-      # --- Linux /etc/passwd (multiple depths + encodings) ---
+      # Linux /etc/passwd: these examples assume the application uses a page parameter.
       - "{{BaseURL}}/index.php?page=../../../../../../etc/passwd"
       - "{{BaseURL}}/index.php?page=../../../../../etc/passwd"
       - "{{BaseURL}}/index.php?page=../../../../etc/passwd"
@@ -25,46 +26,30 @@ http:
       - "{{BaseURL}}/?page=../../../../../../etc/passwd"
       - "{{BaseURL}}/index.php?page=%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd"
       - "{{BaseURL}}/index.php?page=....//....//....//....//etc/passwd"
-      
-      # --- Windows fallback ---
+
+      # Windows win.ini: adapt the path and parameter to the authorised lab.
       - "{{BaseURL}}/index.php?page=..\\..\\..\\..\\windows\\win.ini"
       - "{{BaseURL}}/index.php?page=../../../../windows/win.ini"
-      - "{{BaseURL}}/templatize.asp?item=../../../../windows/win.ini"
-      
+      - "{{BaseURL}}/?page=../../../../windows/win.ini"
+
     stop-at-first-match: true
     redirects: true
     max-redirects: 3
 
     matchers-condition: or
     matchers:
-      # --- Linux /etc/passwd: standard root entry ---
+      # Match a root entry in a typical Linux /etc/passwd response.
       - type: regex
         name: linux-passwd
         part: body
         regex:
-          - "root:[x*]?:0:0:[^:]*:/root:"
-          - "root:x:0:0:root:/root:"
+          - '(?m)^root:[^:]*:0:0:[^:]*:/root:'
 
-      # --- Linux: multiple passwd users (stronger evidence) ---
-      - type: regex
-        name: linux-passwd-multi
-        part: body
-        regex:
-          - "(?:daemon|bin|sys|nobody):[x*]?:\\d+:\\d+:"
-
-      # --- Windows signatures ---
+      # Require both common section names to reduce Windows false positives.
       - type: word
         name: windows-winini
         part: body
         words:
           - "[fonts]"
           - "[extensions]"
-        condition: or
-
-      - type: word
-        name: windows-bootini
-        part: body
-        words:
-          - "[boot loader]"
-          - "[operating systems]"
-        condition: or
+        condition: and
