@@ -81,7 +81,7 @@ Nuclei-LFI-Templates/
 Check whether Nuclei is installed:
 
 ```bash
-nuclei -version
+nuclei
 ```
 
 Update the Nuclei community templates:
