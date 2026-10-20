@@ -1,0 +1,53 @@
+id: custom-lfi-file-payload
+
+info:
+  name: Custom LFI via Payload File
+  author: sr7
+  severity: critical
+  description: |
+    Detects Local File Inclusion by loading payloads from a separate text file.
+    This allows for testing a large number of payloads without cluttering the template.
+  reference:
+    - https://raw.githubusercontent.com/emadshanab/LFI-Payload-List/master/LFI%20payloads.txt
+    - https://owasp.org/www-community/attacks/Path_Traversal
+  tags: lfi,traversal,file-payload
+
+http:
+  - method: GET
+    # টার্গেট অনুযায়ী ?page= বা ?file= পরিবর্তন করে নিতে হবে
+    path:
+      - "{{BaseURL}}/?page={{lfi_payload}}"
+
+    # এখানে payloads ফোল্ডারের ভেতরের ফাইলটি কল করা হচ্ছে
+    payloads:
+      lfi_payload: ../payloads/lfi-payloads.txt
+
+    stop-at-first-match: true
+    redirects: true
+    max-redirects: 3
+
+    matchers-condition: or
+    matchers:
+      # Linux /etc/passwd
+      - type: regex
+        name: linux-passwd
+        part: body
+        regex:
+          - "root:[x*]?:0:0:[^:]*:/root:"
+          - "root:x:0:0:root:/root:"
+
+      # Linux multiple users
+      - type: regex
+        name: linux-passwd-multi
+        part: body
+        regex:
+          - "(?:daemon|bin|sys|nobody):[x*]?:\\d+:\\d+:"
+
+      # Windows win.ini
+      - type: word
+        name: windows-winini
+        part: body
+        words:
+          - "[fonts]"
+          - "[extensions]"
+        condition: or
