@@ -6,16 +6,20 @@ A practical learning repository for understanding **Local File Inclusion (LFI)**
 
 ## Contents
 
-- [1. LFI fundamentals](#1-lfi-fundamentals)
-- [2. How Nuclei works](#2-how-nuclei-works)
-- [3. Repository structure](#3-repository-structure)
-- [4. Setup on Kali Linux](#4-setup-on-kali-linux)
-- [5. Run the templates](#5-run-the-templates)
-- [6. Verify findings](#6-verify-findings)
-- [7. Limitations](#7-limitations)
-- [8. Prevention](#8-prevention)
+- [LFI fundamentals](#1-lfi-fundamentals)
+- [How Nuclei works](#2-how-nuclei-works)
+- [Repository structure](#3-repository-structure)
+- [Setup on Kali Linux](#4-setup-on-kali-linux)
+- [Run the templates](#5-run-the-templates)
+- [Verify findings](#6-verify-findings)
+- [Limitations](#7-limitations)
+- [Prevention](#8-prevention)
 - [List Scan — Scan Multiple Targets](#list-scan--scan-multiple-targets)
-- [9. Quick revision](#9-quick-revision)
+  - [a. Create a target list](#a-create-a-target-list)
+  - [b. Run one custom LFI template against the list](#b-run-one-custom-lfi-template-against-the-list)
+  - [c. Why use list scanning?](#c-why-use-list-scanning)
+  - [d. Important limitations](#d-important-limitations)
+- [Quick revision](#9-quick-revision)
 - [References](#references)
 
 ## 1. LFI fundamentals
@@ -167,7 +171,7 @@ Input filtering alone is fragile. Prefer safe file-selection logic and strict al
 
 Use a **list scan** when you have several in-scope websites or subdomains and want to run the same Nuclei template against each one. It saves time, keeps checks consistent, and avoids running a separate command for every target.
 
-### 1. Create a target list
+### a. Create a target list
 
 Create a text file named `targets.txt` with one authorised target per line. Include the protocol for clarity:
 
@@ -179,7 +183,7 @@ https://api.example.com
 
 Only include systems explicitly covered by your permission or testing scope. Do not scan arbitrary public websites just because they are reachable.
 
-### 2. Run one custom LFI template against the list
+### b. Run one custom LFI template against the list
 
 Run these commands from the repository root:
 
@@ -197,14 +201,14 @@ nuclei -list targets.txt -t templates/LFI-template-2.yaml -rl 5
 - `-t` selects the custom template to run against every listed target.
 - `-rl 5` limits the overall request rate to 5 requests per second; treat this as a cautious starting point and follow the agreed testing rules.
 
-### 3. Why use list scanning?
+### c. Why use list scanning?
 
 - **Efficiency:** scan a number of approved targets with one command.
 - **Consistency:** run the same checks against each target.
 - **Repeatability:** keep the target list and command for a repeatable authorised assessment.
 - **Easier asset coverage:** manage an approved set of subdomains without running a separate command for each.
 
-### 4. Important limitations
+### d. Important limitations
 
 List scanning does not make the template more comprehensive. These custom templates only test the paths and parameter names defined in their YAML, such as `/index.php?page=` or `/?page=`. They do not discover every endpoint or automatically test other parameter names such as `file=`; adapt the template to requests observed in your authorised lab.
 
