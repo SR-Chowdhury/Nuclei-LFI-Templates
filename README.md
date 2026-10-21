@@ -6,21 +6,21 @@ A practical learning repository for understanding **Local File Inclusion (LFI)**
 
 ## Contents
 
-- [LFI fundamentals](#1-lfi-fundamentals)
-- [How Nuclei works](#2-how-nuclei-works)
-- [Repository structure](#3-repository-structure)
-- [Setup on Kali Linux](#4-setup-on-kali-linux)
-- [Run the templates](#5-run-the-templates)
-- [Verify findings](#6-verify-findings)
-- [Limitations](#7-limitations)
-- [Prevention](#8-prevention)
-- [List Scan — Scan Multiple Targets](#list-scan--scan-multiple-targets)
+1. [LFI fundamentals](#1-lfi-fundamentals)
+2. [How Nuclei works](#2-how-nuclei-works)
+3. [Repository structure](#3-repository-structure)
+4. [Setup on Kali Linux](#4-setup-on-kali-linux)
+5. [Run the templates](#5-run-the-templates)
+6. [Verify findings](#6-verify-findings)
+7. [Limitations](#7-limitations)
+8. [Prevention](#8-prevention)
+9. [List Scan — Scan Multiple Targets](#9-list-scan--scan-multiple-targets)
   - [a. Create a target list](#a-create-a-target-list)
   - [b. Run one custom LFI template against the list](#b-run-one-custom-lfi-template-against-the-list)
   - [c. Why use list scanning?](#c-why-use-list-scanning)
   - [d. Important limitations](#d-important-limitations)
-- [Quick revision](#9-quick-revision)
-- [References](#references)
+10. [Quick revision](#10-quick-revision)
+11. [References](#11-references)
 
 ## 1. LFI fundamentals
 
@@ -167,7 +167,7 @@ Treat these as learning templates, not production-validated detection rules. The
 
 Input filtering alone is fragile. Prefer safe file-selection logic and strict allowlists.
 
-## List Scan — Scan Multiple Targets
+## 9. List Scan — Scan Multiple Targets
 
 Use a **list scan** when you have several in-scope websites or subdomains and want to run the same Nuclei template against each one. It saves time, keeps checks consistent, and avoids running a separate command for every target.
 
@@ -214,7 +214,7 @@ List scanning does not make the template more comprehensive. These custom templa
 
 Template 2 uses a large payload wordlist and can generate many requests across multiple targets. Start with a small approved lab list and a small payload set, keep the request rate controlled, and verify every finding manually. A match is not proof on its own, and no match does not prove a target is secure.
 
-## 9. Quick revision
+## 10. Quick revision
 
 **What is LFI?** A vulnerability where user-controlled input causes an application to read or include an unintended local server file.
 
@@ -228,7 +228,7 @@ Template 2 uses a large payload wordlist and can generate many requests across m
 
 **How do I validate a template?** Run `nuclei -validate -t path/to/template.yaml`. This checks validity, not detection accuracy.
 
-## References
+## 11. References
 
 - [Nuclei documentation](https://docs.projectdiscovery.io/tools/nuclei/overview)
 - [Nuclei template guide](https://docs.projectdiscovery.io/templates/introduction)
