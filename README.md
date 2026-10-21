@@ -1,5 +1,7 @@
 # Nuclei LFI Templates & Study Notes
 
+> **SR7 | Think Like an Attacker. Build Like a Defender.**
+
 A practical learning repository for understanding **Local File Inclusion (LFI)** and experimenting with custom [Nuclei](https://github.com/projectdiscovery/nuclei) templates in an authorised lab.
 
 > **Safety:** Use these templates only on systems you own or have explicit permission to test. A large payload list can generate many HTTP requests.
