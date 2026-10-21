@@ -14,6 +14,7 @@ A practical learning repository for understanding **Local File Inclusion (LFI)**
 - [6. Verify findings](#6-verify-findings)
 - [7. Limitations](#7-limitations)
 - [8. Prevention](#8-prevention)
+- [List Scan — Scan Multiple Targets](#list-scan--scan-multiple-targets)
 - [9. Quick revision](#9-quick-revision)
 - [References](#references)
 
@@ -161,6 +162,53 @@ Treat these as learning templates, not production-validated detection rules. The
 - Log suspicious path requests and test file-handling code.
 
 Input filtering alone is fragile. Prefer safe file-selection logic and strict allowlists.
+
+## List Scan — Scan Multiple Targets
+
+Use a **list scan** when you have several in-scope websites or subdomains and want to run the same Nuclei template against each one. It saves time, keeps checks consistent, and avoids running a separate command for every target.
+
+### 1. Create a target list
+
+Create a text file named `targets.txt` with one authorised target per line. Include the protocol for clarity:
+
+```text
+https://app1.example.com
+https://staging.example.com
+https://api.example.com
+```
+
+Only include systems explicitly covered by your permission or testing scope. Do not scan arbitrary public websites just because they are reachable.
+
+### 2. Run one custom LFI template against the list
+
+Run these commands from the repository root:
+
+```bash
+nuclei -list targets.txt -t templates/LFI-template-1.yaml -rl 5
+```
+
+To use the file-based payload template:
+
+```bash
+nuclei -list targets.txt -t templates/LFI-template-2.yaml -rl 5
+```
+
+- `-list targets.txt` reads multiple targets from a text file (one target per line).
+- `-t` selects the custom template to run against every listed target.
+- `-rl 5` limits the overall request rate to 5 requests per second; treat this as a cautious starting point and follow the agreed testing rules.
+
+### 3. Why use list scanning?
+
+- **Efficiency:** scan a number of approved targets with one command.
+- **Consistency:** run the same checks against each target.
+- **Repeatability:** keep the target list and command for a repeatable authorised assessment.
+- **Easier asset coverage:** manage an approved set of subdomains without running a separate command for each.
+
+### 4. Important limitations
+
+List scanning does not make the template more comprehensive. These custom templates only test the paths and parameter names defined in their YAML, such as `/index.php?page=` or `/?page=`. They do not discover every endpoint or automatically test other parameter names such as `file=`; adapt the template to requests observed in your authorised lab.
+
+Template 2 uses a large payload wordlist and can generate many requests across multiple targets. Start with a small approved lab list and a small payload set, keep the request rate controlled, and verify every finding manually. A match is not proof on its own, and no match does not prove a target is secure.
 
 ## 9. Quick revision
 
