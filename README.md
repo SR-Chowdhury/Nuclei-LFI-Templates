@@ -13,6 +13,7 @@ A practical learning repository for understanding **Local File Inclusion (LFI)**
 3. [Repository structure](#3-repository-structure)
 4. [Setup on Kali Linux](#4-setup-on-kali-linux)
 5. [Run the templates](#5-run-the-templates)
+  - [A few useful Nuclei flags](#a-few-useful-nuclei-flags)
 6. [Verify findings](#6-verify-findings)
 7. [Limitations](#7-limitations)
 8. [Prevention](#8-prevention)
@@ -22,7 +23,8 @@ A practical learning repository for understanding **Local File Inclusion (LFI)**
   - [c. Why use list scanning?](#c-why-use-list-scanning)
   - [d. Important limitations](#d-important-limitations)
 10. [Quick revision](#10-quick-revision)
-11. [References](#11-references)
+11. [Nikto — Brief Class Note](#11-nikto--brief-class-note)
+12. [References](#12-references)
 
 ## 1. LFI fundamentals
 
@@ -135,6 +137,18 @@ nuclei -u https://YOUR-LAB-HOST -t templates/LFI-template-2.yaml -rl 5
 
 The examples assume specific paths and a `page` parameter. Real applications may use different endpoints or parameters, so adapt the template to an observed request in your authorised lab. Start with a small, reviewed payload list before using a large wordlist.
 
+### A few useful Nuclei flags
+
+- `-u https://example.com` specifies one target to scan.
+- `-t templates/example.yaml` selects the template to run.
+- `-l targets.txt` reads multiple targets from a file; the List Scan examples use the equivalent `-list` spelling.
+- `-rl 5` limits the request rate to 5 requests per second.
+- `-severity medium,high` selects templates by their declared severity.
+- `-o results.txt` saves scan output to a file.
+- `-validate -t templates/example.yaml` checks whether a custom template is valid before running it.
+
+Run `nuclei -h` to see the available command-line options, and see the [official Nuclei documentation](https://docs.projectdiscovery.io/tools/nuclei/overview).
+
 ## 6. Verify findings
 
 A match means the response satisfied a template matcher. It does **not**, by itself, prove exploitability or impact.
@@ -230,7 +244,23 @@ Template 2 uses a large payload wordlist and can generate many requests across m
 
 **How do I validate a template?** Run `nuclei -validate -t path/to/template.yaml`. This checks validity, not detection accuracy.
 
-## 11. References
+## 11. Nikto — Brief Class Note
+
+Nikto is an open-source web server scanner that checks for potential server misconfigurations, outdated software, and risky files.
+
+Class example:
+```
+nikto -h http://testasp.vulnweb.com/
+```
+
+- `-h` — specifies the target host or URL.
+- Run `nikto -Help` to see the available options.
+
+Nikto findings may include informational items and potential issues, so verify findings manually. Scan only systems you own or are authorised to test.
+
+See the official [Nikto documentation](https://github.com/sullo/nikto/wiki/Basic-Testing).
+
+## 12. References
 
 - [Nuclei documentation](https://docs.projectdiscovery.io/tools/nuclei/overview)
 - [Nuclei template guide](https://docs.projectdiscovery.io/templates/introduction)
